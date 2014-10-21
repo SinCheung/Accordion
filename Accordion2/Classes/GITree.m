@@ -72,14 +72,19 @@
 	[array replaceObjectsInRange:NSMakeRange(index, 0) withObjectsFromArray:children];
 	int res = 0;
 	int i=0;
+	res += children.count;//开始就开始计算子节点的个数，下一步通过递归计算已展开的子节点的子节点数
+	
 	for (GITreeNode *child in children) {
 		if (child.directoryIsExpanded) {
-			i += [self _insertChildren:child.children inArray:array atIndex:index+i+1];
-			res += child.children.count;
+			//此处设置 count 来保存递归返回的结果，避免了原作者的写法造成的节点展开已展开的子节点的数量计算错误
+			//导致程序崩溃的问题。从而从根本上解决了 n 层树的折叠和展开问题。
+			int count = [self _insertChildren:child.children inArray:array atIndex:index+i+1];
+			i += count;
+			res += count;
 		}
 		i++;
 	}
-	res += children.count;
+
 	return res;
 	
 }
